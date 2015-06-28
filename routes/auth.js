@@ -1,5 +1,6 @@
 var router = require("express").Router(),
     app = require("../lib/app").getInstance(),
+    _ = require('lodash'),
     passportLocal = require('passport-local'),
     passportGoogle = require('passport-google-oauth'),
     passportGithub = require('passport-github').Strategy,
@@ -81,6 +82,34 @@ if (auth.alone.enabled) {
   ));
 }
 
+if (auth.local.enabled) {
+
+  passport.use(new passportLocal.Strategy(
+
+    function(username, password, done) {
+
+      var wantedUsername = username.toLowerCase();
+      var wantedPasswordHash = tools.hashify(password);
+
+      var foundUser = _.find(auth.local.accounts, function (account) {
+          return account.username.toLowerCase() === wantedUsername &&
+            account.passwordHash === wantedPasswordHash;
+      });
+
+      if (!foundUser) {
+        return done(null, false, { message: 'Incorrect username or password' });
+      }
+
+      usedAuthentication("local");
+
+      return done(null, {
+        displayName: foundUser.username,
+        email: foundUser.email || ""
+      });
+    }
+  ));
+}
+
 function usedAuthentication(name) {
   for (var a in auth) {
     auth[a].used = (a == name);
@@ -113,7 +142,7 @@ function _getAuthDone(req, res) {
     return;
   }
 
-  if (!auth.alone.used && !tools.isAuthorized(res.locals.user.email, app.locals.config.get("authorization").validMatches)) {
+  if (!auth.alone.used && !auth.local.used && !tools.isAuthorized(res.locals.user.email, app.locals.config.get("authorization").validMatches)) {
     req.logout();
     req.session = null;
     res.statusCode = 403;
