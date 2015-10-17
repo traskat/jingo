@@ -1,3 +1,34 @@
+Version 1.4.1, October 17th, 2015
+=================================
+
+- Fixes #68, CSS support for markdown tables
+- Removes deprecated `licenses` object in packages.json
+
+Version 1.4.0, October 11th, 2015
+=================================
+
+- Fixes a bug on header rendering (closes #93)
+- Removes iconv and uses the transliteration module (finally!)
+
+The version is coded 1.4.0 because removing iconv may create some regression of old installations.
+
+Version 1.3.1, October 4th, 2015
+=================================
+
+- Upgrades CodeMirror to 5.7
+- Uses _github flavoured markdown_ as the default CodeMirror mode (Closes #99)
+- Uses github username if the displayName is empty (Closes #95)
+
+Version 1.3.0, July 19th, 2015
+=================================
+
+- Fixes #80 – Crash when a title starts with /
+- Fixes #87 – Better management of slashes in titles (replaced by "+")
+- Adds the search form to the search pages, so that we could...
+- ...show the login option on mobile (removes the search field) because we...
+- ...added the search icon to the toolbox
+- Merges #88 and #89
+
 Version 1.2.12, June 28th, 2015
 =================================
 

@@ -2,8 +2,6 @@
 
 [ ![Codeship Status for claudioc/jingo](https://www.codeship.io/projects/4c413870-353e-0132-115c-220292a78f73/status)](https://www.codeship.io/projects/40997)
 
-**Warning: the current version of Jingo (1.x.x) is relatively new and it has gone through some major rewrites. If you find yourself having problems with this version, you can still use the previous stable [version 0.6.1](https://github.com/claudioc/jingo/releases/tag/v0.6.1). If this is the case, please take a minute and fill out one [issue](https://github.com/claudioc/jingo/issues). And don't forget to take a look at the [list of changes](https://github.com/claudioc/jingo/blob/master/ChangeLog.md)!**
-
 JINGO
 =====
 
@@ -71,13 +69,25 @@ For code syntax highlighting, Jingo uses the `node-syntaxhighlighter` module. Fo
 Installation
 ------------
 
-`npm install jingo` or download/clone the whole thing and run "npm install".
+`npm install jingo` or download/clone the whole thing and run `npm install`.
+
+Note: if you already have Jingo installed, please also run `npm prune` (some modules can be stale and need to be removed).
 
 Jingo needs a config file and to create a sample config file, just run `jingo -s`, redirect the output on a file and then edit it (`jingo -s > config.yaml`). The config file contains all the available configuration options. Be sure to provide a valid server hostname (like wiki.mycompany.com) if you use a 3rd party provider for authentication (like Google or GitHub). It is needed for them to be able to get back to you.
 
 This document contains also [the reference](#configuration-options-reference) for all the possible options.
 
-If you define a `remote` to push to, then Jingo will automatically issue a push to that remote every `pushInterval` seconds. You can also specify a branch using the syntax "remotename branchname". If you don't specify a branch, Jingo will use `master`. Please note that before the `push`, a `pull` will also be issued (at the moment Jingo will not try to resolve conflicts, though).
+If you define a `remote` to push to, then Jingo will automatically issue a push to that remote every `pushInterval` seconds. To declare a `remote` for Jingo to use, you'll need to identify the name of your local remote. The following example shows how a local remote is typically defined: 
+
+`git remote add origin https://github.com/joeuser/jingorepo.git'`
+
+Based on that example, you would update config.yaml with the remote name "origin" as follows:
+
+`remote: "origin"`
+
+You can also use the `git remote` command to get the name of your remote.
+
+You can also specify a branch using the syntax "remotename branchname". If you don't specify a branch, Jingo will use `master`. Please note that before the `push`, a `pull` will also be issued (at the moment Jingo will not try to resolve conflicts, though).
 
 The basic command to run the wiki will then be
 
@@ -129,11 +139,6 @@ The _authorization_ section of the config file has two keys: `anonRead` and `val
 If anonRead is false you need to authenticate also for reading and then the email of the user _must_ match at least one of the regular expressions provided via validMatches, which is a comma separated list. There is no "anonWrite", though. To edit a page the user must be authenticated.
 
 The authentication is mandatory to edit pages from the web interface, but jingo works on a git repository; that means that you could skip the authentication altogether and edit pages with your editor and push to the remote that jingo is serving.
-
-Common problems
----------------
-
-Sometimes upgrading your version of node.js could break the `iconv` module. Try updating it with `npm install iconv`.
 
 Known limitations
 -----------------
@@ -346,7 +351,7 @@ Configuration options reference
 
 #### pages.title.asciiOnly
 
-  If this is set to true, Jingo will convert any non-Ascii character present in the title of the document to an ASCII equivalent (using iconv), when creating the filename of the document. Default was true for Jingo < 1.0 while for Jingo >= 1.0 the default is false
+  If this is set to true, Jingo will convert any non-Ascii character present in the title of the document to an ASCII equivalent (using transliteration), when creating the filename of the document. Default was true for Jingo < 1.0 while for Jingo >= 1.0 the default is false
 
 #### pages.title.lowercase
 
