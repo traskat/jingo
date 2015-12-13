@@ -15,7 +15,7 @@ router.post("/login", passport.authenticate('local', { successRedirect: '/auth/d
 router.get("/auth/done", _getAuthDone);
 
 router.get("/auth/google", passport.authenticate('google', {
-  scope: ['https://www.googleapis.com/auth/userinfo.email'] }
+  scope: ['https://www.googleapis.com/auth/userinfo.email', 'https://www.googleapis.com/auth/userinfo.profile' ] }
 ));
 router.get("/oauth2callback", passport.authenticate('google', {
   successRedirect: '/auth/done',
@@ -152,9 +152,13 @@ function _getAuthDone(req, res) {
     return;
   }
 
+res.locals.user.email = 'jingouser';
+
   if (!auth.alone.used &&
       !auth.local.used &&
-      !tools.isAuthorized(res.locals.user.email, app.locals.config.get("authorization").validMatches)) {
+      !tools.isAuthorized(res.locals.user.email,
+                          app.locals.config.get("authorization").validMatches,
+                          app.locals.config.get("authorization").emptyEmailMatches)) {
     req.logout();
     req.session = null;
     res.statusCode = 403;
