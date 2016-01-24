@@ -4,6 +4,7 @@ var router = require("express").Router(),
   passportLocal = require("passport-local"),
   passportGoogle = require("passport-google-oauth"),
   passportGithub = require("passport-github").Strategy,
+  passportLdap = require('passport-ldapauth');
   tools = require("../lib/tools");
 
 var auth = app.locals.config.get("authentication");
@@ -32,6 +33,26 @@ router.get("/auth/github/callback", passport.authenticate("github", {
   successRedirect: proxyPath + "/auth/done",
   failureRedirect: proxyPath + "/login"
 }));
+
+
+/**
+  ldap get route
+**/
+router.get('/ldap/login', function(req,res,next) {
+  res.render("login", {
+    title: app.locals.config.get("application").title,
+    auth: auth
+  });
+});
+
+
+/**
+  ldap post route for authentication
+**/
+router.post('/ldap/login', passport.authenticate('ldapauth',{session:true}), function(req,res) {
+  res.redirect('/auth/done');
+});
+
 
 if (auth.google.enabled) {
   var redirectURL = auth.google.redirectURL || app.locals.baseUrl + "/oauth2callback";
@@ -87,6 +108,18 @@ if (auth.alone.enabled) {
       return done(null, user);
     }
   ));
+}
+
+if (auth.ldap.enabled) {
+  passport.use(new passportLdap({
+    server: {
+      url: auth.ldap.url,//'ldap://ldap.example.com:389',
+      bindDn: auth.ldap.bindDn,//'cn=root,dc=example,dc=com',
+      bindCredentials: auth.ldap.bindCredentials,//'root123456789',
+      searchBase: auth.ldap.searchBase, //'ou=people,dc=example,dc=com',
+      searchFilter: auth.ldap.searchFilter //'(&(memberOf=cn=wiki,ou=people,dc=example,dc=com)(uid={{username}}))'
+    }
+  }));
 }
 
 if (auth.local.enabled) {
@@ -172,7 +205,12 @@ function _getAuthDone(req, res) {
     res.end("<h1>Forbidden</h1>");
   }
   else {
-    var dst = req.session.destination || proxyPath + "/";
+    if (auth.ldap.enabled) {
+      var dst = req.session.destination || "/";
+    }
+    else {
+      var dst = req.session.destination || proxyPath + "/";
+    }
     delete req.session.destination;
     res.redirect(dst);
   }
